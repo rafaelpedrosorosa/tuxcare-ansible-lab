@@ -1,0 +1,10 @@
+---
+eportal_allowed_hosts: []
+eportal_cache_mode: true
+eportal_proxy_url: ""
+eportal_admin_user: admin
+eportal_admin_password: ""
+eportal_registration_key: ""
+eportal_registration_key_server_limit: 10
+eportal_registration_key_feed: ""
+
