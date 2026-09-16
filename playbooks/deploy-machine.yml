@@ -1,0 +1,11 @@
+---
+- name: Instalar agente KernelCare diretamente pela TuxCare Cloud
+  hosts: kernelcare_cloud
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: tuxcare_kernelcare
+      vars:
+        tuxcare_activation_key: "{{ vault_tuxcare_activation_key }}"
+
