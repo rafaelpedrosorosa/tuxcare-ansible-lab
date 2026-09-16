@@ -1,0 +1,11 @@
+# Nunca versionar a activation key descriptografada ou o segredo do Vault.
+inventory/group_vars/kernelcare/vault.yml
+.vault_pass
+
+# Arquivos locais do Ansible e editores.
+*.retry
+.ansible/
+.idea/
+.vscode/
+*.log
+
