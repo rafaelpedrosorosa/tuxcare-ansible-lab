@@ -23,6 +23,20 @@ git --version
 
 Se o pacote `ansible-core` nao estiver disponivel, confirme se os repositorios BaseOS e AppStream da distribuicao estao habilitados.
 
+Clone este repositorio privado pela sua chave SSH do GitHub:
+
+```bash
+git clone git@github.com:rafaelpedrosorosa/tuxcare-kernelcare-ansible-lab.git
+cd tuxcare-kernelcare-ansible-lab
+```
+
+Se preferir HTTPS, o GitHub exige um personal access token no lugar da senha da conta:
+
+```bash
+git clone https://github.com/rafaelpedrosorosa/tuxcare-kernelcare-ansible-lab.git
+cd tuxcare-kernelcare-ansible-lab
+```
+
 ## 2. Obter a chave de teste
 
 Solicite o trial do KernelCare no site da TuxCare. Voce recebera uma activation key. Nao grave essa chave diretamente em playbooks, commits ou no README.
@@ -95,7 +109,7 @@ Codigos retornados por `kcarectl --status`:
 
 Com `AUTO_UPDATE=True`, o agente verifica periodicamente se existem novos patches. A role tambem executa `kcarectl --update` na primeira implantacao.
 
-## 7. Versionar e enviar ao GitHub
+## 7. Versionar as proximas alteracoes
 
 Antes do primeiro commit, confira se a chave nao sera incluida:
 
@@ -104,26 +118,11 @@ git status --short
 git check-ignore -v inventory/group_vars/kernelcare/vault.yml
 ```
 
-Inicialize e faca o primeiro commit:
+Depois de alterar o laboratorio, revise e envie ao repositorio:
 
 ```bash
-git init
-git branch -M main
 git add .
-git commit -m "feat: adiciona laboratorio TuxCare KernelCare com Ansible"
-```
-
-Crie no GitHub um repositorio vazio chamado `tuxcare-kernelcare-ansible-lab`, sem README, `.gitignore` ou licenca. Depois conecte e envie:
-
-```bash
-git remote add origin git@github.com:SEU_USUARIO/tuxcare-kernelcare-ansible-lab.git
-git push -u origin main
-```
-
-Para HTTPS:
-
-```bash
-git remote add origin https://github.com/SEU_USUARIO/tuxcare-kernelcare-ansible-lab.git
+git commit -m "descricao objetiva da alteracao"
 git push -u origin main
 ```
 
@@ -143,4 +142,3 @@ Depois altere `tuxcare_registration_id` em `inventory/group_vars/kernelcare/main
 sudo kcarectl --unregister
 sudo dnf remove -y kernelcare
 ```
-
