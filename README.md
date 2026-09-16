@@ -1,144 +1,91 @@
-# Laboratorio TuxCare KernelCare com Ansible
+# TuxCare KernelCare e ePortal com Ansible
 
-Laboratorio para instalar, registrar e validar o KernelCare em uma unica VM RHEL, AlmaLinux ou Rocky Linux 9. O Ansible e executado dentro da propria VM usando conexao local.
+Laboratorio Ansible dividido em tres fluxos independentes:
 
-## O que este projeto faz
+1. instalar o agente KernelCare diretamente pela TuxCare Cloud;
+2. instalar e configurar um servidor ePortal;
+3. instalar os agentes e incluir as maquinas no ePortal.
 
-- baixa o instalador oficial do KernelCare por HTTPS;
-- instala um agente na VM local;
-- registra a VM usando uma activation key protegida pelo Ansible Vault;
-- habilita a verificacao automatica de patches;
-- aplica imediatamente os patches disponiveis;
-- valida o resultado usando `kcarectl --status`.
+## Arquitetura
 
-## 1. Preparar a VM
+```text
+TuxCare Cloud
+    |
+    | HTTPS: patchsets e metadados
+    v
+ePortal interno
+    |
+    | HTTP/HTTPS: instalador, registro e patches
+    +--> linux-client-01
+    +--> linux-client-02
+```
 
-Entre na VM e instale Git e Ansible Core:
+O deploy direto pela Cloud continua disponivel para a VM `tuxcare-lab`.
+
+## Documentacao por etapa
+
+- [1. Deploy do agente em uma maquina](docs/01-deploy-machine.md)
+- [2. Deploy do servidor ePortal](docs/02-deploy-eportal.md)
+- [3. Inclusao das maquinas no ePortal](docs/03-register-machines-eportal.md)
+
+## Playbooks
+
+| Objetivo | Playbook | Grupo do inventario |
+| --- | --- | --- |
+| Agente via TuxCare Cloud | `playbooks/deploy-machine.yml` | `kernelcare_cloud` |
+| Servidor ePortal | `playbooks/deploy-eportal.yml` | `eportal` |
+| Agentes conectados ao ePortal | `playbooks/register-machines-eportal.yml` | `kernelcare_eportal` |
+| Estado de todos os agentes | `playbooks/status.yml` | `kernelcare` |
+
+O antigo `playbooks/deploy.yml` foi mantido como atalho para `deploy-machine.yml`.
+
+## Preparacao
 
 ```bash
 sudo dnf install -y git-core ansible-core
-ansible-playbook --version
-git --version
-```
-
-Se o pacote `ansible-core` nao estiver disponivel, confirme se os repositorios BaseOS e AppStream da distribuicao estao habilitados.
-
-Clone este repositorio privado pela sua chave SSH do GitHub:
-
-```bash
 git clone git@github.com:rafaelpedrosorosa/tuxcare-kernelcare-ansible-lab.git
 cd tuxcare-kernelcare-ansible-lab
-```
-
-Se preferir HTTPS, o GitHub exige um personal access token no lugar da senha da conta:
-
-```bash
-git clone https://github.com/rafaelpedrosorosa/tuxcare-kernelcare-ansible-lab.git
-cd tuxcare-kernelcare-ansible-lab
-```
-
-## 2. Obter a chave de teste
-
-Solicite o trial do KernelCare no site da TuxCare. Voce recebera uma activation key. Nao grave essa chave diretamente em playbooks, commits ou no README.
-
-## 3. Criar o segredo criptografado
-
-Na raiz do repositorio, execute:
-
-```bash
-ansible-vault create inventory/group_vars/kernelcare/vault.yml
-```
-
-No editor aberto pelo Vault, coloque:
-
-```yaml
----
-vault_tuxcare_activation_key: "SUA_CHAVE_DE_TESTE"
-```
-
-O arquivo `vault.yml` esta no `.gitignore`. Para um repositorio compartilhado, tambem e possivel versionar o arquivo ja criptografado, mas nunca a chave em texto puro.
-
-## 4. Validar antes da instalacao
-
-```bash
 ansible-inventory --graph
-ansible kernelcare -m ansible.builtin.ping
-ansible-playbook playbooks/deploy.yml --syntax-check --ask-vault-pass
 ```
 
-O inventario usa:
+Copie os arquivos `vault.yml.example` correspondentes para `vault.yml` usando `ansible-vault create`. Os arquivos reais de segredo sao ignorados pelo Git.
 
-```yaml
-tuxcare-lab:
-  ansible_connection: local
-  ansible_host: 127.0.0.1
+## Estrutura principal
+
+```text
+inventory/
+  hosts.yml
+  group_vars/
+    eportal/
+    kernelcare/
+    kernelcare_cloud/
+    kernelcare_eportal/
+playbooks/
+  deploy-machine.yml
+  deploy-eportal.yml
+  register-machines-eportal.yml
+  status.yml
+roles/
+  tuxcare_kernelcare/
+  tuxcare_eportal/
+docs/
+  01-deploy-machine.md
+  02-deploy-eportal.md
+  03-register-machines-eportal.md
 ```
 
-Portanto, SSH nao e necessario neste laboratorio.
+## Ordem recomendada do laboratorio
 
-## 5. Instalar o KernelCare
+1. Teste `deploy-machine.yml` na VM local usando a activation key do trial Cloud.
+2. Prepare uma VM dedicada e execute `deploy-eportal.yml`.
+3. Configure as credenciais de Patch Source no painel do ePortal.
+4. Cadastre uma VM canario no grupo `kernelcare_eportal`.
+5. Execute `register-machines-eportal.yml` somente no canario.
+6. Confirme o check-in no painel e depois registre as demais maquinas.
 
-Se seu usuario utiliza sudo com senha:
+## Referencias oficiais
 
-```bash
-ansible-playbook playbooks/deploy.yml \
-  --ask-vault-pass \
-  --ask-become-pass
-```
+- [KernelCare](https://docs.tuxcare.com/live-patching-services/)
+- [KernelCare ePortal](https://docs.tuxcare.com/eportal/)
+- [ePortal API](https://docs.tuxcare.com/eportal-api/)
 
-Se estiver conectado como `root`, retire `--ask-become-pass`.
-
-## 6. Conferir o funcionamento
-
-```bash
-ansible-playbook playbooks/status.yml
-sudo kcarectl --info
-sudo kcarectl --patch-info
-sudo kcarectl --uname
-sudo kcarectl --license-info
-```
-
-Codigos retornados por `kcarectl --status`:
-
-| Codigo | Significado |
-| ---: | --- |
-| 0 | Atualizado no patchset mais recente |
-| 1 | Nenhum patch aplicado |
-| 2 | Existem patches novos ainda nao aplicados |
-| 3 | Kernel nao suportado |
-
-Com `AUTO_UPDATE=True`, o agente verifica periodicamente se existem novos patches. A role tambem executa `kcarectl --update` na primeira implantacao.
-
-## 7. Versionar as proximas alteracoes
-
-Antes do primeiro commit, confira se a chave nao sera incluida:
-
-```bash
-git status --short
-git check-ignore -v inventory/group_vars/kernelcare/vault.yml
-```
-
-Depois de alterar o laboratorio, revise e envie ao repositorio:
-
-```bash
-git add .
-git commit -m "descricao objetiva da alteracao"
-git push -u origin main
-```
-
-## Rotacionar a activation key
-
-Edite o segredo:
-
-```bash
-ansible-vault edit inventory/group_vars/kernelcare/vault.yml
-```
-
-Depois altere `tuxcare_registration_id` em `inventory/group_vars/kernelcare/main.yml`, por exemplo de `trial-key-v1` para `trial-key-v2`. Esse identificador nao contem o segredo; ele apenas informa a role que deve registrar novamente a VM.
-
-## Remover o laboratorio
-
-```bash
-sudo kcarectl --unregister
-sudo dnf remove -y kernelcare
-```
