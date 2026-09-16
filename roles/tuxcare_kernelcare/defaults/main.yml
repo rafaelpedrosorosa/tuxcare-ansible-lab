@@ -1,0 +1,14 @@
+---
+tuxcare_source: cloud
+tuxcare_eportal_url: ""
+tuxcare_activation_key: ""
+tuxcare_registration_id: default
+tuxcare_auto_update: true
+tuxcare_apply_now: true
+tuxcare_validate_certs: true
+tuxcare_proxy_url: ""
+tuxcare_sticky_patch_from_key: false
+tuxcare_installer_path: /usr/local/src/kernelcare-installer.sh
+tuxcare_marker_dir: /var/lib/tuxcare-ansible
+tuxcare_marker_file: "{{ tuxcare_marker_dir }}/registration-id"
+
