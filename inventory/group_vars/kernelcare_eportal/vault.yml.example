@@ -1,0 +1,5 @@
+---
+# Deve conter a mesma chave configurada no grupo eportal.
+# Copie para vault.yml e criptografe com ansible-vault.
+vault_tuxcare_activation_key: "CHAVE_DE_REGISTRO_GERADA_NO_EPORTAL"
+
