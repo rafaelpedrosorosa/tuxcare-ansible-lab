@@ -1,0 +1,6 @@
+---
+- name: Reiniciar ePortal
+  ansible.builtin.service:
+    name: eportal
+    state: restarted
+
