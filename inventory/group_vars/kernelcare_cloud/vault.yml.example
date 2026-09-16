@@ -1,0 +1,4 @@
+---
+# Copie para vault.yml e criptografe com ansible-vault.
+vault_tuxcare_activation_key: "CHAVE_DO_TRIAL_TUXCARE_CLOUD"
+
