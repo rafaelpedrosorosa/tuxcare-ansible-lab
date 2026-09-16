@@ -1,0 +1,12 @@
+---
+eportal_allowed_hosts:
+  - "192.168.56.50"
+  - "eportal-lab"
+
+# Para laboratorio. Em producao, publique o ePortal com HTTPS e certificado confiavel.
+eportal_cache_mode: true
+eportal_proxy_url: ""
+eportal_admin_user: admin
+eportal_registration_key_server_limit: 10
+eportal_registration_key_feed: ""
+
