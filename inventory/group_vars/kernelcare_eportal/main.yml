@@ -1,0 +1,7 @@
+---
+tuxcare_source: eportal
+tuxcare_eportal_url: "http://192.168.56.50"
+
+# Identificador nao secreto. Incremente quando trocar a chave do ePortal.
+tuxcare_registration_id: "eportal-lab-key-v1"
+
