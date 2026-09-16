@@ -1,0 +1,12 @@
+---
+- name: Instalar agentes e registrar as maquinas no ePortal
+  hosts: kernelcare_eportal
+  become: true
+  gather_facts: true
+  serial: "{{ rollout_batch | default(1) }}"
+
+  roles:
+    - role: tuxcare_kernelcare
+      vars:
+        tuxcare_activation_key: "{{ vault_tuxcare_activation_key }}"
+
