@@ -1,0 +1,5 @@
+---
+# Copie para vault.yml e criptografe com ansible-vault.
+vault_eportal_admin_password: "TROQUE_ESTA_SENHA"
+vault_eportal_registration_key: "CHAVE_FORTE_PARA_REGISTRAR_AGENTES"
+
