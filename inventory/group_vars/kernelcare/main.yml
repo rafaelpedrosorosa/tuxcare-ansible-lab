@@ -1,0 +1,17 @@
+---
+# Laboratorio de uma VM RHEL/AlmaLinux/Rocky Linux 9 usando TuxCare Cloud.
+tuxcare_source: cloud
+
+# Necessario apenas quando tuxcare_source: eportal.
+tuxcare_eportal_url: "https://eportal.example.com"
+
+tuxcare_auto_update: true
+tuxcare_apply_now: true
+tuxcare_validate_certs: true
+tuxcare_proxy_url: ""
+
+# Identificador NAO secreto. Altere-o quando trocar a chave para forcar novo registro.
+tuxcare_registration_id: "trial-key-v1"
+
+# Opcional: controle central de rollout pela Sticky Tag associada a chave.
+tuxcare_sticky_patch_from_key: false
