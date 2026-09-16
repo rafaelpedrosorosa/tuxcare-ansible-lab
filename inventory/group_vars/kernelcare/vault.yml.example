@@ -1,3 +1,3 @@
 ---
-# Crie vault.yml neste diretorio usando ansible-vault.
-vault_tuxcare_activation_key: "SUBSTITUA_PELA_CHAVE"
+# Este arquivo foi mantido apenas como referencia da primeira versao.
+# Use os exemplos especificos em kernelcare_cloud/ ou kernelcare_eportal/.
