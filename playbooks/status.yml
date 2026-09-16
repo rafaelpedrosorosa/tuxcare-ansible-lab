@@ -1,0 +1,19 @@
+---
+- name: Consultar estado do KernelCare sem alterar os servidores
+  hosts: kernelcare
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Consultar status do patching
+      ansible.builtin.command: /usr/bin/kcarectl --status
+      register: kcare_status
+      changed_when: false
+      failed_when: false
+
+    - name: Exibir resultado por host
+      ansible.builtin.debug:
+        msg: >-
+          rc={{ kcare_status.rc }};
+          {{ kcare_status.stdout | default(kcare_status.stderr, true) }}
+
