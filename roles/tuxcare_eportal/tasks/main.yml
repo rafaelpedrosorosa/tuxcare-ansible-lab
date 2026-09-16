@@ -1,0 +1,144 @@
+---
+- name: Validar plataforma e variaveis do ePortal
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == 'RedHat'
+      - ansible_distribution_major_version | int in [8, 9]
+      - eportal_allowed_hosts | length > 0
+      - eportal_admin_password | length > 0
+      - eportal_registration_key | length > 0
+    fail_msg: >-
+      O laboratorio do ePortal requer EL 8/9, ALLOWED_HOSTS, senha administrativa
+      e uma chave de registro protegidas pelo Ansible Vault.
+  no_log: true
+
+- name: Instalar dependencias basicas
+  ansible.builtin.package:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+
+- name: Configurar repositorio oficial do Nginx
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/nginx.repo
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [nginx]
+      name=nginx stable repo
+      baseurl=https://nginx.org/packages/centos/$releasever/$basearch/
+      gpgcheck=1
+      enabled=1
+      gpgkey=https://nginx.org/keys/nginx_signing.key
+      module_hotfixes=true
+
+- name: Configurar repositorio oficial do KernelCare ePortal
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/kcare-eportal.repo
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [kcare-eportal]
+      name=KernelCare ePortal
+      baseurl=https://www.repo.cloudlinux.com/kcare-eportal/$releasever/$basearch/
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://repo.cloudlinux.com/kernelcare/RPM-GPG-KEY-KernelCare-rsa4096
+
+- name: Instalar o pacote do ePortal
+  ansible.builtin.package:
+    name: kcare-eportal
+    state: present
+
+- name: Gerenciar configuracao principal do ePortal
+  ansible.builtin.blockinfile:
+    path: /etc/eportal/config
+    create: true
+    owner: root
+    group: root
+    mode: '0600'
+    marker: "# {mark} ANSIBLE MANAGED EPORTAL"
+    block: |
+      ALLOWED_HOSTS = {{ eportal_allowed_hosts | to_json }}
+      CACHE_MODE = {{ 'True' if eportal_cache_mode else 'False' }}
+      {% if eportal_proxy_url | length > 0 %}
+      PROXY = {{ eportal_proxy_url | to_json }}
+      {% endif %}
+  notify: Reiniciar ePortal
+
+- name: Habilitar e iniciar Nginx e ePortal
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - nginx
+    - eportal
+
+- name: Listar usuarios existentes
+  ansible.builtin.command: kc.eportal user
+  register: eportal_users
+  changed_when: false
+
+- name: Criar usuario administrador inicial
+  ansible.builtin.command:
+    argv:
+      - kc.eportal
+      - user
+      - -a
+      - -p
+      - "{{ eportal_admin_password }}"
+      - -r
+      - admin
+      - "{{ eportal_admin_user }}"
+  when: eportal_admin_user not in eportal_users.stdout
+  no_log: true
+
+- name: Listar chaves de registro existentes
+  ansible.builtin.command: kc.eportal key
+  register: eportal_keys
+  changed_when: false
+  no_log: true
+
+- name: Criar chave para registrar agentes no feed padrao
+  ansible.builtin.command:
+    argv:
+      - kc.eportal
+      - key
+      - -a
+      - "{{ eportal_registration_key }}"
+      - --server-limit
+      - "{{ eportal_registration_key_server_limit | string }}"
+      - --product
+      - kernel
+  when:
+    - eportal_registration_key not in eportal_keys.stdout
+    - eportal_registration_key_feed | length == 0
+  no_log: true
+
+- name: Criar chave para registrar agentes em um feed especifico
+  ansible.builtin.command:
+    argv:
+      - kc.eportal
+      - key
+      - -a
+      - "{{ eportal_registration_key }}"
+      - --server-limit
+      - "{{ eportal_registration_key_server_limit | string }}"
+      - --product
+      - kernel
+      - --feed
+      - "{{ eportal_registration_key_feed }}"
+  when:
+    - eportal_registration_key not in eportal_keys.stdout
+    - eportal_registration_key_feed | length > 0
+  no_log: true
+
+- name: Validar servico do ePortal
+  ansible.builtin.command: systemctl is-active eportal
+  register: eportal_service_status
+  changed_when: false
+  failed_when: eportal_service_status.stdout | trim != 'active'
