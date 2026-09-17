@@ -2,38 +2,53 @@
 - name: Validar variaveis obrigatorias
   ansible.builtin.assert:
     that:
-      - tuxcare_activation_key | length > 0
-      - tuxcare_source in ['cloud', 'eportal']
-      - tuxcare_source != 'eportal' or tuxcare_eportal_url | length > 0
-    fail_msg: "Defina a chave via Ansible Vault e, para ePortal, informe tuxcare_eportal_url."
+      - tuxcare_kernelcare_activation_key | length > 0
+      - tuxcare_kernelcare_source in ['cloud', 'eportal']
+      - tuxcare_kernelcare_source != 'eportal' or tuxcare_kernelcare_eportal_url | length > 0
+    fail_msg: "Defina a chave via Ansible Vault e, para ePortal, informe tuxcare_kernelcare_eportal_url."
   no_log: true
 
 - name: Verificar se o agente ja esta instalado
   ansible.builtin.stat:
     path: /usr/bin/kcarectl
-  register: kcarectl_binary
+  register: tuxcare_kernelcare_binary
 
 - name: Baixar o instalador oficial do KernelCare
   ansible.builtin.get_url:
     url: >-
-      {{ (tuxcare_eportal_url | regex_replace('/$', '') ~ '/install-kernelcare')
-         if tuxcare_source == 'eportal'
+      {{ (tuxcare_kernelcare_eportal_url | regex_replace('/$', '') ~ '/install-kernelcare')
+         if tuxcare_kernelcare_source == 'eportal'
          else 'https://kernelcare.com/installer' }}
-    dest: "{{ tuxcare_installer_path }}"
+    dest: "{{ tuxcare_kernelcare_installer_path }}"
     owner: root
     group: root
     mode: '0700'
     force: false
-    validate_certs: "{{ tuxcare_validate_certs }}"
-  environment: "{{ {'https_proxy': tuxcare_proxy_url, 'http_proxy': tuxcare_proxy_url} if tuxcare_proxy_url | length > 0 else {} }}"
-  when: not kcarectl_binary.stat.exists
+    validate_certs: "{{ tuxcare_kernelcare_validate_certs }}"
+  environment: >-
+    {{
+      {
+        'https_proxy': tuxcare_kernelcare_proxy_url,
+        'http_proxy': tuxcare_kernelcare_proxy_url
+      }
+      if tuxcare_kernelcare_proxy_url | length > 0 else {}
+    }}
+  when: not tuxcare_kernelcare_binary.stat.exists
 
 - name: Executar o instalador oficial
   ansible.builtin.command:
     argv:
-      - "{{ tuxcare_installer_path }}"
-  environment: "{{ {'https_proxy': tuxcare_proxy_url, 'http_proxy': tuxcare_proxy_url} if tuxcare_proxy_url | length > 0 else {} }}"
-  when: not kcarectl_binary.stat.exists
+      - "{{ tuxcare_kernelcare_installer_path }}"
+  environment: >-
+    {{
+      {
+        'https_proxy': tuxcare_kernelcare_proxy_url,
+        'http_proxy': tuxcare_kernelcare_proxy_url
+      }
+      if tuxcare_kernelcare_proxy_url | length > 0 else {}
+    }}
+  when: not tuxcare_kernelcare_binary.stat.exists
+  changed_when: true
 
 - name: Garantir diretorio de configuracao
   ansible.builtin.file:
@@ -52,21 +67,21 @@
     mode: '0600'
     marker: "# {mark} ANSIBLE MANAGED TUXCARE"
     block: |
-      AUTO_UPDATE={{ 'True' if tuxcare_auto_update else 'False' }}
-      {% if tuxcare_source == 'eportal' %}
-      PATCH_SERVER={{ tuxcare_eportal_url | regex_replace('/$', '') }}/
-      REGISTRATION_URL={{ tuxcare_eportal_url | regex_replace('/$', '') }}/admin/api/kcare
+      AUTO_UPDATE={{ 'True' if tuxcare_kernelcare_auto_update else 'False' }}
+      {% if tuxcare_kernelcare_source == 'eportal' %}
+      PATCH_SERVER={{ tuxcare_kernelcare_eportal_url | regex_replace('/$', '') }}/
+      REGISTRATION_URL={{ tuxcare_kernelcare_eportal_url | regex_replace('/$', '') }}/admin/api/kcare
       {% endif %}
-      {% if tuxcare_proxy_url | length > 0 %}
-      HTTPS_PROXY={{ tuxcare_proxy_url }}
+      {% if tuxcare_kernelcare_proxy_url | length > 0 %}
+      HTTPS_PROXY={{ tuxcare_kernelcare_proxy_url }}
       {% endif %}
-      {% if tuxcare_sticky_patch_from_key %}
+      {% if tuxcare_kernelcare_sticky_patch_from_key %}
       STICKY_PATCH=KEY
       {% endif %}
 
 - name: Garantir diretorio do marcador de registro
   ansible.builtin.file:
-    path: "{{ tuxcare_marker_dir }}"
+    path: "{{ tuxcare_kernelcare_marker_dir }}"
     state: directory
     owner: root
     group: root
@@ -74,8 +89,8 @@
 
 - name: Ler marcador de registro existente
   ansible.builtin.slurp:
-    path: "{{ tuxcare_marker_file }}"
-  register: registration_marker
+    path: "{{ tuxcare_kernelcare_marker_file }}"
+  register: tuxcare_kernelcare_registration_marker
   failed_when: false
   changed_when: false
 
@@ -84,37 +99,39 @@
     argv:
       - /usr/bin/kcarectl
       - --register
-      - "{{ tuxcare_activation_key }}"
+      - "{{ tuxcare_kernelcare_activation_key }}"
   no_log: true
+  changed_when: true
   when: >-
-    registration_marker.content is not defined or
-    (registration_marker.content | b64decode | trim) != tuxcare_registration_id
+    tuxcare_kernelcare_registration_marker.content is not defined or
+    (tuxcare_kernelcare_registration_marker.content | b64decode | trim) !=
+    tuxcare_kernelcare_registration_id
 
 - name: Gravar identificador nao secreto do registro
   ansible.builtin.copy:
-    content: "{{ tuxcare_registration_id }}\n"
-    dest: "{{ tuxcare_marker_file }}"
+    content: "{{ tuxcare_kernelcare_registration_id }}\n"
+    dest: "{{ tuxcare_kernelcare_marker_file }}"
     owner: root
     group: root
     mode: '0600'
   when: >-
-    registration_marker.content is not defined or
-    (registration_marker.content | b64decode | trim) != tuxcare_registration_id
+    tuxcare_kernelcare_registration_marker.content is not defined or
+    (tuxcare_kernelcare_registration_marker.content | b64decode | trim) !=
+    tuxcare_kernelcare_registration_id
 
 - name: Aplicar imediatamente os patches disponiveis
   ansible.builtin.command: /usr/bin/kcarectl --update
-  register: kcare_update
+  register: tuxcare_kernelcare_update
   changed_when: false
-  when: tuxcare_apply_now
+  when: tuxcare_kernelcare_apply_now
 
 - name: Consultar o estado final
   ansible.builtin.command: /usr/bin/kcarectl --status
-  register: kcare_status
+  register: tuxcare_kernelcare_status
   changed_when: false
-  failed_when: kcare_status.rc not in [0, 1]
+  failed_when: tuxcare_kernelcare_status.rc not in [0, 1]
 
 - name: Alertar quando ainda nao ha patch aplicado
   ansible.builtin.debug:
     msg: "KernelCare instalado e registrado, mas nenhum patch esta aplicado neste kernel (status 1)."
-  when: kcare_status.rc == 1
-
+  when: tuxcare_kernelcare_status.rc == 1

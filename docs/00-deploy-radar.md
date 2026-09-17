@@ -28,16 +28,13 @@ radar_clients:
 
 ## 2. Proteger a API key com Ansible Vault
 
-Crie o arquivo real a partir do exemplo:
+Crie o arquivo real diretamente com o Ansible Vault:
 
 ```bash
-cp inventory/group_vars/radar_clients/vault.yml.example \
-  inventory/group_vars/radar_clients/vault.yml
-
-ansible-vault encrypt inventory/group_vars/radar_clients/vault.yml
+ansible-vault create inventory/group_vars/radar_clients/vault.yml
 ```
 
-Antes de criptografar, substitua o valor de exemplo:
+Informe este conteudo no editor aberto pelo Vault:
 
 ```yaml
 ---
@@ -75,9 +72,10 @@ sudo su -s /bin/bash nobody -c \
 O pacote cria `/etc/cron.d/tuxcare-radar`. O cron verifica se o intervalo de
 `time-between-runs` ja passou; neste projeto, o valor padrao e `23h`.
 
-O `radar.yaml` contem a API key em texto claro no host. Por isso, ele e criado
-com modo `0600`, e a task do template usa `no_log: true`. Evite exibir esse
-arquivo em evidencias, logs ou pipelines.
+O `radar.yaml` contem a API key em texto claro no host. Por isso, ele pertence
+ao usuario de execucao `nobody`, usa grupo `root` e modo `0600`. A task do
+template tambem usa `no_log: true`. Evite exibir esse arquivo em evidencias,
+logs ou pipelines.
 
 ## Opcoes
 

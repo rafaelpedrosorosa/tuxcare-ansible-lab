@@ -1,3 +1,4 @@
 ---
 # Compatibilidade com a primeira versao do laboratorio.
-- import_playbook: deploy-machine.yml
+- name: Executar deploy direto do KernelCare pela TuxCare Cloud
+  ansible.builtin.import_playbook: deploy-machine.yml

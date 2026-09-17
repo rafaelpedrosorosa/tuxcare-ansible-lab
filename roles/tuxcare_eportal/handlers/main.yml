@@ -3,4 +3,3 @@
   ansible.builtin.service:
     name: eportal
     state: restarted
-

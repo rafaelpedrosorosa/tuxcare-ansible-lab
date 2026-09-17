@@ -8,5 +8,4 @@
   roles:
     - role: tuxcare_kernelcare
       vars:
-        tuxcare_activation_key: "{{ vault_tuxcare_activation_key }}"
-
+        tuxcare_kernelcare_activation_key: "{{ vault_tuxcare_activation_key }}"

@@ -16,4 +16,3 @@
         msg: >-
           rc={{ kcare_status.rc }};
           {{ kcare_status.stdout | default(kcare_status.stderr, true) }}
-

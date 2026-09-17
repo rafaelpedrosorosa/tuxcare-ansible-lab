@@ -1,7 +1,7 @@
 ---
 # Configuracao comum a todos os agentes KernelCare.
-tuxcare_auto_update: true
-tuxcare_apply_now: true
-tuxcare_validate_certs: true
-tuxcare_proxy_url: ""
-tuxcare_sticky_patch_from_key: false
+tuxcare_kernelcare_auto_update: true
+tuxcare_kernelcare_apply_now: true
+tuxcare_kernelcare_validate_certs: true
+tuxcare_kernelcare_proxy_url: ""
+tuxcare_kernelcare_sticky_patch_from_key: false

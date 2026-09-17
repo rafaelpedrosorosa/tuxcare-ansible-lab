@@ -1,6 +1,7 @@
 # Nunca versionar a activation key descriptografada ou o segredo do Vault.
 inventory/group_vars/**/vault.yml
 .vault_pass
+.vault-password
 
 # Arquivos locais do Ansible e editores.
 *.retry

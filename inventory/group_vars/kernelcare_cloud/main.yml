@@ -1,7 +1,6 @@
 ---
-tuxcare_source: cloud
-tuxcare_eportal_url: ""
+tuxcare_kernelcare_source: cloud
+tuxcare_kernelcare_eportal_url: ""
 
 # Identificador nao secreto. Incremente quando trocar a activation key.
-tuxcare_registration_id: "cloud-trial-key-v1"
-
+tuxcare_kernelcare_registration_id: "cloud-trial-key-v1"

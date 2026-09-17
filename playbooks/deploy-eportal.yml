@@ -7,6 +7,5 @@
   roles:
     - role: tuxcare_eportal
       vars:
-        eportal_admin_password: "{{ vault_eportal_admin_password }}"
-        eportal_registration_key: "{{ vault_eportal_registration_key }}"
-
+        tuxcare_eportal_admin_password: "{{ vault_eportal_admin_password }}"
+        tuxcare_eportal_registration_key: "{{ vault_eportal_registration_key }}"

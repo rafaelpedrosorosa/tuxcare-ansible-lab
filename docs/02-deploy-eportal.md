@@ -25,14 +25,14 @@ eportal:
 Ajuste `inventory/group_vars/eportal/main.yml`:
 
 ```yaml
-eportal_allowed_hosts:
+tuxcare_eportal_allowed_hosts:
   - "192.168.56.50"
   - "eportal-lab"
 
-eportal_cache_mode: true
-eportal_proxy_url: ""
-eportal_admin_user: admin
-eportal_registration_key_server_limit: 10
+tuxcare_eportal_cache_mode: true
+tuxcare_eportal_proxy_url: ""
+tuxcare_eportal_admin_user: admin
+tuxcare_eportal_registration_key_server_limit: 10
 ```
 
 ## Criar o Vault do ePortal

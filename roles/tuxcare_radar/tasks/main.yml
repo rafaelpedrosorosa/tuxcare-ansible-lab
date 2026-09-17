@@ -3,9 +3,12 @@
   ansible.builtin.assert:
     that:
       - ansible_os_family in ['RedHat', 'Debian']
+      - >-
+        ansible_os_family != 'Debian' or
+        ansible_distribution in ['Debian', 'Ubuntu']
     fail_msg: >-
       Familia nao suportada: {{ ansible_os_family }}. Este role atende sistemas
-      RPM da familia Red Hat e sistemas APT da familia Debian.
+      RPM da familia Red Hat, Debian e Ubuntu.
 
 - name: Validar configuracao obrigatoria do Radar
   ansible.builtin.assert:

@@ -4,16 +4,16 @@ Este fluxo instala o agente KernelCare nos clientes, configura o endereco do ePo
 
 ## Resolver o endereco do ePortal
 
-Todos os clientes devem resolver e acessar o endereco configurado em `tuxcare_eportal_url`. No laboratorio de exemplo:
+Todos os clientes devem resolver e acessar o endereco configurado em `tuxcare_kernelcare_eportal_url`. No laboratorio de exemplo:
 
 ```yaml
-tuxcare_eportal_url: "http://192.168.56.50"
+tuxcare_kernelcare_eportal_url: "http://192.168.56.50"
 ```
 
 Em producao, prefira:
 
 ```yaml
-tuxcare_eportal_url: "https://eportal.empresa.local"
+tuxcare_kernelcare_eportal_url: "https://eportal.empresa.local"
 ```
 
 ## Cadastrar os clientes no inventario
@@ -37,9 +37,9 @@ Arquivo `inventory/group_vars/kernelcare_eportal/main.yml`:
 
 ```yaml
 ---
-tuxcare_source: eportal
-tuxcare_eportal_url: "http://192.168.56.50"
-tuxcare_registration_id: "eportal-lab-key-v1"
+tuxcare_kernelcare_source: eportal
+tuxcare_kernelcare_eportal_url: "http://192.168.56.50"
+tuxcare_kernelcare_registration_id: "eportal-lab-key-v1"
 ```
 
 Crie o Vault:

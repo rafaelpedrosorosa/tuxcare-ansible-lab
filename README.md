@@ -41,10 +41,7 @@ sudo dnf install -y git-core ansible-core
 git clone https://github.com/rafaelpedrosorosa/tuxcare-ansible-lab.git
 cd tuxcare-ansible-lab
 
-cp inventory/group_vars/radar_clients/vault.yml.example \
-  inventory/group_vars/radar_clients/vault.yml
-# Edite vault.yml e informe a API key do Radar antes de criptografar.
-ansible-vault encrypt inventory/group_vars/radar_clients/vault.yml
+ansible-vault create inventory/group_vars/radar_clients/vault.yml
 
 ansible-inventory --graph
 ansible-playbook playbooks/deploy-radar.yml --ask-vault-pass
@@ -91,11 +88,25 @@ docs/
 1. valida a familia do sistema e a presenca da API key;
 2. configura o repositorio oficial TuxCare para RPM ou APT;
 3. instala somente o pacote `tuxcare-radar`;
-4. publica `/etc/tuxcare-radar/radar.yaml` com modo `0600`;
+4. publica `/etc/tuxcare-radar/radar.yaml` como `nobody:root`, modo `0600`;
 5. preserva o agendamento criado pelo proprio pacote.
 
 O template e unico para todas as distribuicoes. A API key vem do Ansible Vault,
 e a task que grava a configuracao usa `no_log: true`.
+
+## Validacao local
+
+```bash
+python3 -m pip install --user -r requirements-dev.txt
+ansible-lint .
+
+for playbook in playbooks/*.yml; do
+  ansible-playbook "$playbook" --syntax-check
+done
+```
+
+O mesmo conjunto de verificacoes e executado automaticamente pelo GitHub
+Actions em pushes e pull requests.
 
 ## Referencias oficiais
 
@@ -103,4 +114,3 @@ e a task que grava a configuracao usa `no_log: true`.
 - [KernelCare](https://docs.tuxcare.com/live-patching-services/)
 - [KernelCare ePortal](https://docs.tuxcare.com/eportal/)
 - [ePortal API](https://docs.tuxcare.com/eportal-api/)
-

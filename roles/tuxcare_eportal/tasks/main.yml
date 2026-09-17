@@ -4,9 +4,9 @@
     that:
       - ansible_os_family == 'RedHat'
       - ansible_distribution_major_version | int in [8, 9]
-      - eportal_allowed_hosts | length > 0
-      - eportal_admin_password | length > 0
-      - eportal_registration_key | length > 0
+      - tuxcare_eportal_allowed_hosts | length > 0
+      - tuxcare_eportal_admin_password | length > 0
+      - tuxcare_eportal_registration_key | length > 0
     fail_msg: >-
       O laboratorio do ePortal requer EL 8/9, ALLOWED_HOSTS, senha administrativa
       e uma chave de registro protegidas pelo Ansible Vault.
@@ -62,10 +62,10 @@
     mode: '0600'
     marker: "# {mark} ANSIBLE MANAGED EPORTAL"
     block: |
-      ALLOWED_HOSTS = {{ eportal_allowed_hosts | to_json }}
-      CACHE_MODE = {{ 'True' if eportal_cache_mode else 'False' }}
-      {% if eportal_proxy_url | length > 0 %}
-      PROXY = {{ eportal_proxy_url | to_json }}
+      ALLOWED_HOSTS = {{ tuxcare_eportal_allowed_hosts | to_json }}
+      CACHE_MODE = {{ 'True' if tuxcare_eportal_cache_mode else 'False' }}
+      {% if tuxcare_eportal_proxy_url | length > 0 %}
+      PROXY = {{ tuxcare_eportal_proxy_url | to_json }}
       {% endif %}
   notify: Reiniciar ePortal
 
@@ -80,7 +80,7 @@
 
 - name: Listar usuarios existentes
   ansible.builtin.command: kc.eportal user
-  register: eportal_users
+  register: tuxcare_eportal_users
   changed_when: false
 
 - name: Criar usuario administrador inicial
@@ -90,16 +90,17 @@
       - user
       - -a
       - -p
-      - "{{ eportal_admin_password }}"
+      - "{{ tuxcare_eportal_admin_password }}"
       - -r
       - admin
-      - "{{ eportal_admin_user }}"
-  when: eportal_admin_user not in eportal_users.stdout
+      - "{{ tuxcare_eportal_admin_user }}"
+  when: tuxcare_eportal_admin_user not in tuxcare_eportal_users.stdout
+  changed_when: true
   no_log: true
 
 - name: Listar chaves de registro existentes
   ansible.builtin.command: kc.eportal key
-  register: eportal_keys
+  register: tuxcare_eportal_keys
   changed_when: false
   no_log: true
 
@@ -109,14 +110,15 @@
       - kc.eportal
       - key
       - -a
-      - "{{ eportal_registration_key }}"
+      - "{{ tuxcare_eportal_registration_key }}"
       - --server-limit
-      - "{{ eportal_registration_key_server_limit | string }}"
+      - "{{ tuxcare_eportal_registration_key_server_limit | string }}"
       - --product
       - kernel
   when:
-    - eportal_registration_key not in eportal_keys.stdout
-    - eportal_registration_key_feed | length == 0
+    - tuxcare_eportal_registration_key not in tuxcare_eportal_keys.stdout
+    - tuxcare_eportal_registration_key_feed | length == 0
+  changed_when: true
   no_log: true
 
 - name: Criar chave para registrar agentes em um feed especifico
@@ -125,20 +127,21 @@
       - kc.eportal
       - key
       - -a
-      - "{{ eportal_registration_key }}"
+      - "{{ tuxcare_eportal_registration_key }}"
       - --server-limit
-      - "{{ eportal_registration_key_server_limit | string }}"
+      - "{{ tuxcare_eportal_registration_key_server_limit | string }}"
       - --product
       - kernel
       - --feed
-      - "{{ eportal_registration_key_feed }}"
+      - "{{ tuxcare_eportal_registration_key_feed }}"
   when:
-    - eportal_registration_key not in eportal_keys.stdout
-    - eportal_registration_key_feed | length > 0
+    - tuxcare_eportal_registration_key not in tuxcare_eportal_keys.stdout
+    - tuxcare_eportal_registration_key_feed | length > 0
+  changed_when: true
   no_log: true
 
-- name: Validar servico do ePortal
-  ansible.builtin.command: systemctl is-active eportal
-  register: eportal_service_status
-  changed_when: false
-  failed_when: eportal_service_status.stdout | trim != 'active'
+- name: Garantir que o servico ePortal permanece ativo
+  ansible.builtin.systemd_service:
+    name: eportal
+    state: started
+    enabled: true
