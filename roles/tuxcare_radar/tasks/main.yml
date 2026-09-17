@@ -29,7 +29,7 @@
   ansible.builtin.template:
     src: radar.yaml.j2
     dest: "{{ tuxcare_radar_config_path }}"
-    owner: root
+    owner: nobody
     group: root
     mode: "0600"
   no_log: true
