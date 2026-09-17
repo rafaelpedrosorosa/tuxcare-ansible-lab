@@ -38,8 +38,8 @@ O antigo `playbooks/deploy.yml` foi mantido como atalho para
 
 ```bash
 sudo dnf install -y git-core ansible-core
-git clone https://github.com/rafaelpedrosorosa/tuxcare-kernelcare-ansible-lab.git
-cd tuxcare-kernelcare-ansible-lab
+git clone https://github.com/rafaelpedrosorosa/tuxcare-ansible-lab.git
+cd tuxcare-ansible-lab
 
 cp inventory/group_vars/radar_clients/vault.yml.example \
   inventory/group_vars/radar_clients/vault.yml

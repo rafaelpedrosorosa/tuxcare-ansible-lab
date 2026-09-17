@@ -6,8 +6,8 @@ Este fluxo instala o KernelCare diretamente pela TuxCare Cloud em uma VM RHEL, A
 
 ```bash
 sudo dnf install -y git-core ansible-core
-git clone git@github.com:rafaelpedrosorosa/tuxcare-kernelcare-ansible-lab.git
-cd tuxcare-kernelcare-ansible-lab
+git clone git@github.com:rafaelpedrosorosa/tuxcare-ansible-lab.git
+cd tuxcare-ansible-lab
 ```
 
 O host de laboratorio esta no grupo `kernelcare_cloud` e usa conexao local:
