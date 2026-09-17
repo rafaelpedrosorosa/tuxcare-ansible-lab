@@ -1,0 +1,10 @@
+---
+- name: Instalar e configurar o TuxCare Radar
+  hosts: radar_clients
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: tuxcare_radar
+      vars:
+        tuxcare_radar_api_key: "{{ vault_tuxcare_radar_api_key }}"

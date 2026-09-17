@@ -1,0 +1,12 @@
+---
+# US: https://radar.tuxcare.com
+# EU: https://eu.radar.tuxcare.com
+tuxcare_radar_base_url: "https://radar.tuxcare.com"
+tuxcare_radar_time_between_runs: "23h"
+tuxcare_radar_enabled: true
+
+# Opcionais.
+tuxcare_radar_tags:
+  - lab
+  - ansible
+tuxcare_radar_use_alternative_node_id: false

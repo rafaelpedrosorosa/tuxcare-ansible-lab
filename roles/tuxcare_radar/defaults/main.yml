@@ -1,0 +1,9 @@
+---
+tuxcare_radar_api_key: ""
+tuxcare_radar_package_name: tuxcare-radar
+tuxcare_radar_config_path: /etc/tuxcare-radar/radar.yaml
+tuxcare_radar_base_url: "https://radar.tuxcare.com"
+tuxcare_radar_time_between_runs: "23h"
+tuxcare_radar_enabled: true
+tuxcare_radar_tags: []
+tuxcare_radar_use_alternative_node_id: false

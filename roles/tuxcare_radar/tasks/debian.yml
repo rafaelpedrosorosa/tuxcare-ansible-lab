@@ -1,0 +1,35 @@
+---
+- name: Instalar pre-requisitos APT
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Instalar chave de assinatura do repositorio TuxCare
+  ansible.builtin.get_url:
+    url: "https://repo.tuxcare.com/radar/tuxcare.gpg"
+    dest: /usr/share/keyrings/tuxcare.gpg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configurar repositorio APT do TuxCare Radar
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/tuxcare-radar.list
+    owner: root
+    group: root
+    mode: "0644"
+    content: >-
+      deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/tuxcare.gpg]
+      https://repo.tuxcare.com/radar/{{ ansible_distribution | lower }}/{{
+      ansible_distribution_version if ansible_distribution == 'Ubuntu'
+      else ansible_distribution_major_version }}
+      stable main
+
+- name: Instalar pacote TuxCare Radar via APT
+  ansible.builtin.apt:
+    name: "{{ tuxcare_radar_package_name }}"
+    state: present
+    update_cache: true

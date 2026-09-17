@@ -1,0 +1,12 @@
+base-url: {{ tuxcare_radar_base_url | to_json }}
+logfile: /var/log/tuxcare-radar/radar.log
+statefile: /var/cache/tuxcare-radar/radar.json
+time-between-runs: {{ tuxcare_radar_time_between_runs | to_json }}
+enabled: {{ tuxcare_radar_enabled | bool | lower }}
+apikey: {{ tuxcare_radar_api_key | to_json }}
+{% if tuxcare_radar_tags | length > 0 %}
+tags: {{ tuxcare_radar_tags | join(',') | to_json }}
+{% endif %}
+{% if tuxcare_radar_use_alternative_node_id | bool %}
+node-id: true
+{% endif %}

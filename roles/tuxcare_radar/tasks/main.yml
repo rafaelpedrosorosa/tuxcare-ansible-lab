@@ -1,0 +1,35 @@
+---
+- name: Validar familia de sistema operacional
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family in ['RedHat', 'Debian']
+    fail_msg: >-
+      Familia nao suportada: {{ ansible_os_family }}. Este role atende sistemas
+      RPM da familia Red Hat e sistemas APT da familia Debian.
+
+- name: Validar configuracao obrigatoria do Radar
+  ansible.builtin.assert:
+    that:
+      - tuxcare_radar_api_key | length > 0
+      - tuxcare_radar_api_key != 'SUBSTITUA_PELA_API_KEY_DO_RADAR'
+      - tuxcare_radar_base_url | length > 0
+    fail_msg: >-
+      Defina vault_tuxcare_radar_api_key no Vault do grupo radar_clients.
+  no_log: true
+
+- name: Instalar Radar em sistema RPM
+  ansible.builtin.include_tasks: rpm.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Instalar Radar em sistema APT
+  ansible.builtin.include_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Publicar configuracao do Radar
+  ansible.builtin.template:
+    src: radar.yaml.j2
+    dest: "{{ tuxcare_radar_config_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
